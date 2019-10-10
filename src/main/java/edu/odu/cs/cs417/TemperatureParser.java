@@ -96,10 +96,13 @@ public class TemperatureParser
 
         int step = 0;
         for (String[] line : rawLines) {
-            double[] tempReadings = new double[line.length];
-
+        	String[] tempCore;
+        	tempCore = line[0].split(" ");
+            double[] tempReadings = new double[tempCore.length];
+            
             for (int i = 0; i < tempReadings.length; i++) {
-                tempReadings[i] = Double.parseDouble(line[i]);
+            	
+            	tempReadings[i] = Double.parseDouble(tempCore[i]);
             }
 
             allReadings.add(new CoreTempReading(step, tempReadings));
