@@ -1,19 +1,39 @@
 package edu.odu.cs.cs417;
-
+/**
+ * This is a tool that do the following:
+ * 		-solve matrix (solve matrix of equations, get transposed matrix, and get result of matrix multiplication)
+ * 		-generate a linear least squares approximation function
+ * 		-generate a piecewise linear interpolation  	
+ * @author Thinh Tran
+ *
+ */
 public class DataAnalyzer {
+	/**
+	 * 
+	 * This is a tool set that handle matrix mathematics
+	 * @author Thinh Tran
+	 */
 	public static class MatrixSolver {
-	
-		public static double[][] solve(double[][] a){
+		
+		/**
+		 * Solve a two dimensional matrix using Gaussian Elimination method 
+		 * @param a the two dimensional array to be solved
+		 */
+		public static void solve(double[][] a){
 			for(int i = 0; i < a.length; ++i) {
-				a = swap_row(a,i,getLargestRow(a,i));
-				a = scale(a,i);
+				swap_row(a,i,getLargestRow(a,i));
+				scale(a,i);
 				a[i][i] = 1;
-			    a = eliminate(a,i);
+			    eliminate(a,i);
 			}
-			return backsolve(a);
+			backsolve(a);
 		}
 		
-		public static double[][] backsolve(double[][] a){
+		/**
+		 * Do the backsolve step of Gaussian Elimination method
+		 * @param a the two dimensional array
+		 */
+		public static void backsolve(double[][] a){
 			for(int i = a.length - 1; i >= 1; i--) {
 				for(int j = i - 1; j >= 0; j--) {
 					double s = a[j][i];
@@ -21,10 +41,14 @@ public class DataAnalyzer {
 					a[j][a[0].length - 1] -= s * a[i][a[0].length - 1] ;
 				}
 			}
-			return a;
 		}
 		
-		public static double[][] eliminate(double[][] a, int idx){
+		/**
+		 * Do the eliminate step of Gaussian Elimination method
+		 * @param a the two dimensional array
+		 * @param idx the row to do elimination
+		 */
+		public static void eliminate(double[][] a, int idx){
 			int start_col = 0;
 			for(int i = 0; i < a[0].length; ++i) {
 				if(a[idx][i] != 0) {
@@ -38,10 +62,14 @@ public class DataAnalyzer {
 					a[i][j] = a[i][j] - s * a[idx][j];
 				}
 			}
-			return a;
 		}
 		
-		public static double[][] scale(double[][] a, int idx){
+		/**
+		 * Do the scale step of Gaussian Elimination method
+		 * @param a the two dimensional array
+		 * @param idx the row to do scaling
+		 */
+		public static void scale(double[][] a, int idx){
 			double s = 0;
 			for(int i = 0; i <  a[0].length; ++i) {
 				if(a[idx][i] != 0) {
@@ -52,9 +80,14 @@ public class DataAnalyzer {
 			for(int i = 0; i < a[0].length; ++i) {
 				a[idx][i] = a[idx][i] / s; 
 			}
-			return a;
 		}
 		
+		/**
+		 * Find the row that have a largest value accross the specific column
+		 * @param a the two dimensional array
+		 * @param idx the column to find largest value on
+		 * @return the row number that have the largest value
+		 */
 		public static int getLargestRow(double[][] a, int idx) {
 			double max = 0;
 			int row = idx;
@@ -67,16 +100,26 @@ public class DataAnalyzer {
 			return row;
 		}
 		
-		
-		public static double[][] swap_row(double[][] a, int i, int idx){
+		/**
+		 * Swap two row of the matrix/array
+		 * @param a the two dimensional array
+		 * @param i the row to be swapped
+		 * @param idx the row to be swapped with
+		 */
+		public static void swap_row(double[][] a, int i, int idx){
 			double tmp;
 			for(int j = 0; j < a[0].length; ++j) {
 				tmp = a[i][j];
 				a[i][j] = a[idx][j];
 				a[idx][j] = tmp;
 			}
-			return a;
 		}
+		
+		/**
+		 * Generate the transpose of a matrix
+		 * @param before the two dimensional matrix
+		 * @return the transpose of input matrix
+		 */
 		public static double[][] transpose(double[][] before){
 			double[][] after = new double[before[0].length][before.length];
 			for(int i = 0; i < after.length; ++i) {
@@ -87,6 +130,12 @@ public class DataAnalyzer {
 			return after;
 		}
 		
+		/**
+		 * Multiply two matrixes, the first matrix's column must be equal to second matrix's row
+		 * @param lhs a two dimensional array with n columns
+		 * @param rhs a two dimensional array with n rows
+		 * @return the new matrix resulting from multiplication
+		 */
 		public static double[][] multiply(double[][] lhs, double[][] rhs){
 			double[][] result = new double[lhs.length][rhs[0].length];
 			for(int i = 0; i < result.length; ++i) {
@@ -99,7 +148,13 @@ public class DataAnalyzer {
 			}
 			return result;
 		}
-		
+		/**
+		 * Multiply two matrixes, the first matrix's column must be equal to second matrix's row
+		 * This case the second matrix only have 1 column
+		 * @param lhs a two dimensional array with n columns
+		 * @param rhs a two dimensional array with n rows and 1 column
+		 * @return the re matrix resulting from multiplication
+		 */
 		public static double[] multiply(double[][] lhs, double[] rhs){
 			double[] result = new double[lhs.length];
 			for(int i = 0; i < result.length; ++i) {
@@ -111,32 +166,36 @@ public class DataAnalyzer {
 			return result;
 		}
 }
-
-	public static class LeastSquares{
-		public static String produce(double[][] x, double[] y) {
-			double[][] xTx = MatrixSolver.multiply(MatrixSolver.transpose(x), x);
-			double[] xTy = MatrixSolver.multiply(MatrixSolver.transpose(x), y);
-			
-            double[][] matrix = new double[2][3];
-            for(int i = 0; i < matrix.length; ++i) {
-            	for(int j = 0; j < xTx[0].length; ++j) {
-            		matrix[i][j] = xTx[i][j];
-            	}
-            }
-            for(int i = 0; i < matrix.length; ++i) {
-            	matrix[i][matrix[0].length - 1] = xTy[i];
-            }
+	
+	/**
+	 * Product a linear least squares approximation from two sets of data
+	 * @param x the two dimensional array as the data over x-axis
+	 * @param y the 1 dimensional array as the data over y-axis
+	 * @return the string presentation of the least squares approximation function
+	 */
+	public static String produceLeastSquares(double[][] x, double[] y) {
+		double[][] xTx = MatrixSolver.multiply(MatrixSolver.transpose(x), x);
+		double[] xTy = MatrixSolver.multiply(MatrixSolver.transpose(x), y);
+		double[][] matrix = new double[2][3];
+        for(int i = 0; i < matrix.length; ++i) {
+           	for(int j = 0; j < xTx[0].length; ++j) {
+           		matrix[i][j] = xTx[i][j];
+           	}
+        }
+        for(int i = 0; i < matrix.length; ++i) {
+           	matrix[i][matrix[0].length - 1] = xTy[i];
+        }
            
-            double[][] result = MatrixSolver.solve(matrix);
+        MatrixSolver.solve(matrix);
             
-            StringBuilder bld = new StringBuilder();
-            bld.append(x[0][1] + " <= x < " + x[x.length-1][1] + "; ");
-            bld.append("y = " + result[0][2] + " + " + result[1][2] + "x; least-squares");
+        StringBuilder bld = new StringBuilder();
+        bld.append(x[0][1] + " <= x < " + x[x.length-1][1] + "; ");
+        bld.append("y = " + matrix[0][2] + " + " + matrix[1][2] + "x; least-squares");
             
-            return bld.toString();
-		}
-		
+        return bld.toString();
 	}
+		
+	
 	
 	public static class Interpolation{
 		
