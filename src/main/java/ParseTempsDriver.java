@@ -11,7 +11,7 @@ import java.io.FileNotFoundException;
 
 import static edu.odu.cs.cs417.TemperatureParser.CoreTempReading;
 import static edu.odu.cs.cs417.TemperatureParser.parseRawTemps;
-import static edu.odu.cs.cs417.DataAnalyzer.LeastSquares;
+
 
 /**
  * A simple command line test driver for TemperatureParser.
@@ -37,22 +37,21 @@ public class ParseTempsDriver {
         catch (FileNotFoundException e) {
             System.out.println("File not found: " + e);
         }
-        double[][] lhs = {
-				{1, 0},
-				{1, 1},
-				{1, 2},
-				{1, 3},
-				{1, 4},
-				{1, 5},
-				{1, 6},
-				{1, 7},
-				{1, 8},
-				{1, 9},
-				{1,10}
-		};
-        double[] rhs = {0, 1, 4, 9, 16, 25, 36 ,49 ,64 , 81, 100}; 
-		       
-		
+        
+        
+        double[][] x = {
+        			{1, 1},
+        			{1, 2},
+        			{1, 3},
+        			{1, 4}
+        			};
+        double[] y = {6, 9, 2, 5};		
+        double [][] tab = DataAnalyzer.getDivTable(x, y);
+        for(int i = 0; i < x.length-1;++i) {
+        	System.out.print(DataAnalyzer.produceLinearInterpolation(tab, i));
+        }
+               
+        
         List<CoreTempReading> allTheTemps = parseRawTemps(tFileStream);
         double[][] coretemps = new double[allTheTemps.get(0).readings.length][allTheTemps.size()];
         double[][] time = new double[allTheTemps.size()][2];
@@ -73,15 +72,16 @@ public class ParseTempsDriver {
         for(int i = 0; i < coretemps.length; ++i) {
         	try (FileWriter fw = new FileWriter(filename + "-core-" + i + ".txt"))
         	{
-        		fw.write(DataAnalyzer.LeastSquares.produce(time, coretemps[i]));
+        		fw.write(DataAnalyzer.produceLeastSquares(time, coretemps[i]));
+        		double[][] table = DataAnalyzer.getDivTable(time, coretemps[i]);
+        		for(int k = 0; k < time.length-1; ++k) {
+        			fw.write(DataAnalyzer.produceLinearInterpolation(table, k));
+        		}
+        		
         	}catch(IOException exc) {
         		System.out.println("I/O Error: " + exc);
         	}
         }
         
-        for (CoreTempReading aReading : allTheTemps) {
-        	
-        	System.out.println(aReading);
-        }
     }
 }
