@@ -1,4 +1,7 @@
 package edu.odu.cs.cs417;
+
+import java.text.DecimalFormat;
+
 /**
  * This is a tool that do the following:
  * 		-solve matrix (solve matrix of equations, get transposed matrix, and get result of matrix multiplication)
@@ -187,18 +190,65 @@ public class DataAnalyzer {
         }
            
         MatrixSolver.solve(matrix);
-            
+        DecimalFormat df = new DecimalFormat("#.####");    
         StringBuilder bld = new StringBuilder();
         bld.append(x[0][1] + " <= x < " + x[x.length-1][1] + "; ");
-        bld.append("y = " + matrix[0][2] + " + " + matrix[1][2] + "x; least-squares");
+        bld.append("y1 = " + df.format(matrix[0][2]) + " + " + df.format(matrix[1][2]) + "x; least-squares\n");
             
         return bld.toString();
 	}
 		
 	
-	
-	public static class Interpolation{
+	/**
+	 * Populated the divided-difference table until the order exceeds the number of data points
+	 * @param f the divided-difference table
+	 * @param order the order to populate
+	 */
+	private static void interpolate(double[][] f, int order) {
 		
+		if(order > f.length) {
+			return;
+		}
+		
+		for(int i = 0; i < f.length-order; ++i) {
+			f[i][order+1] = (f[i+1][order]-f[i][order])/(f[i+order][0] - f[i][0]);   
+			
+		}
+		
+		interpolate(f, order+1);
 	}
 	
+	/**
+	 * Produce a divided-difference table to an order equal to the number of data points
+	 * @param x the two dimensional array as the data over x-axis
+	 * @param y the 1 dimensional array as the data over y-axis
+	 * @return the populated table 
+	 */
+	public static double[][] getDivTable(double[][] x, double[] y){
+		double[][] divTable = new double[x.length][x.length+1];
+		for(int i = 0; i < divTable.length; ++i) {
+			divTable[i][0] = x[i][1];
+			divTable[i][1] = y[i];
+		}
+		interpolate(divTable,1);
+		return divTable;	
+	}
+	
+	/**
+	 * Produce a linear interpolation between points
+	 * @param f the divided-difference table
+	 * @param p the starting point the interval
+	 * @return the string presentation of the linear interpolation
+	 */
+	public static String produceLinearInterpolation(double[][] f, int p) {
+		double b = f[p][1]-(f[p][2]*f[p][0]);
+		double a = f[p][2];
+		DecimalFormat df = new DecimalFormat("#.####"); 
+		StringBuilder bld = new StringBuilder();
+        bld.append(f[p][0] + " <= x < " + f[p+1][0] + "; ");
+        bld.append("y1 = " + df.format(b) + " + " + df.format(a) + "x; interpolation\n");
+            
+        return bld.toString();
+		
+	}
 }
